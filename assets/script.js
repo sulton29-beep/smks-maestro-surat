@@ -69,7 +69,6 @@ async function handleLogin(e) {
     try {
         console.log('🔍 Mencoba login dengan:', username);
         
-        // Ambil data admin dari Supabase
         const admin = await getAdmin();
         console.log('📦 Data admin dari database:', admin);
 
