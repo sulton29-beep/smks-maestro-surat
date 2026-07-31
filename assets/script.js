@@ -207,6 +207,7 @@ function renderPermintaan(permintaan) {
 }
 
 // --- PERMINTAAN SURAT (Guru) ---
+// --- PERMINTAAN SURAT (Guru) ---
 async function loadFormSurat() {
     console.log('🔄 Memuat form surat...');
     try {
@@ -220,13 +221,20 @@ async function loadFormSurat() {
                 daftarGuru.forEach(g => {
                     guruSelect.innerHTML += `<option value="${g.nama}">${g.nama}</option>`;
                 });
+                console.log('✅ Dropdown guru terisi:', daftarGuru.length, 'guru');
             } else {
-                guruSelect.innerHTML += '<option value="" disabled>Belum ada guru</option>';
+                guruSelect.innerHTML += '<option value="" disabled>❌ Belum ada guru di database</option>';
+                console.warn('⚠️ Tidak ada data guru!');
             }
         }
 
+        // === PERBAIKI TANGGAL INPUT ===
         const today = new Date();
-        document.getElementById('tanggalInput').value = formatDate(today);
+        const tanggalInput = document.getElementById('tanggalInput');
+        if (tanggalInput) {
+            tanggalInput.value = formatDate(today);
+            console.log('📅 Tanggal input diisi:', tanggalInput.value);
+        }
 
         const lokasiInput = document.getElementById('lokasiDokumen');
         if (lokasiInput && !lokasiInput.value) {
@@ -439,11 +447,13 @@ function kirimWhatsApp(data) {
 }
 
 // --- CMS GURU ---
+// --- CMS GURU ---
 async function loadCMSGuru() {
     if (!localStorage.getItem('admin_logged_in')) {
         window.location.href = 'login.html';
         return;
     }
+    console.log('🔄 Memuat halaman kelola guru...');
     await renderGuruList();
 
     const form = document.getElementById('guruForm');
@@ -456,12 +466,18 @@ async function loadCMSGuru() {
 }
 
 async function renderGuruList() {
+    console.log('🔄 renderGuruList() dipanggil...');
     try {
         const daftarGuru = await getGuru();
+        console.log('📋 Data guru untuk CMS:', daftarGuru);
+        
         const tbody = document.getElementById('guruBody');
-        if (!tbody) return;
+        if (!tbody) {
+            console.error('❌ Elemen guruBody tidak ditemukan!');
+            return;
+        }
 
-        if (daftarGuru.length === 0) {
+        if (!daftarGuru || daftarGuru.length === 0) {
             tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#a0aec0;padding:30px;">Belum ada guru</td></tr>`;
             return;
         }
@@ -479,47 +495,11 @@ async function renderGuruList() {
             `;
         });
         tbody.innerHTML = html;
+        console.log(`✅ ${daftarGuru.length} guru ditampilkan di CMS`);
 
     } catch (error) {
-        console.error('Error render guru:', error);
-        alert('Gagal memuat data guru.');
-    }
-}
-
-async function tambahGuru() {
-    const nama = document.getElementById('namaGuru').value.trim();
-    if (!nama) {
-        showResult('guruResult', 'Masukkan nama guru terlebih dahulu!', 'danger');
-        return;
-    }
-
-    try {
-        await tambahGuru(nama);
-        await tambahLog(`Menambahkan guru: ${nama}`);
-        document.getElementById('namaGuru').value = '';
-        await renderGuruList();
-        showResult('guruResult', `✅ Guru "${nama}" berhasil ditambahkan!`, 'success');
-
-    } catch (error) {
-        console.error('Error tambah guru:', error);
-        showResult('guruResult', '❌ Gagal menambahkan guru. Mungkin nama sudah ada.', 'danger');
-    }
-}
-
-async function hapusGuru(id) {
-    const data = await getGuru();
-    const guru = data.find(g => String(g.id) === String(id));
-    if (!guru || !confirm(`Hapus guru "${guru.nama}"?`)) return;
-
-    try {
-        await hapusGuru(id);
-        await tambahLog(`Menghapus guru: ${guru.nama}`);
-        await renderGuruList();
-        alert(`✅ Guru "${guru.nama}" berhasil dihapus.`);
-
-    } catch (error) {
-        console.error('Error hapus guru:', error);
-        alert('Gagal menghapus guru.');
+        console.error('❌ Error render guru:', error);
+        alert('Gagal memuat data guru. Periksa koneksi internet.');
     }
 }
 

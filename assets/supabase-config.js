@@ -52,8 +52,16 @@ async function getGuru() {
     console.log('📡 getGuru() dipanggil...');
     try {
         const result = await supabaseRequest('guru?select=*&order=nama.asc');
-        console.log('📦 Data guru:', result);
-        return result;
+        console.log('📦 Data guru dari Supabase:', result);
+        
+        // Jika result kosong, coba tanpa order
+        if (!result || result.length === 0) {
+            console.log('⚠️ Data guru kosong, coba tanpa order...');
+            const result2 = await supabaseRequest('guru?select=*');
+            console.log('📦 Data guru (tanpa order):', result2);
+            return result2 || [];
+        }
+        return result || [];
     } catch (error) {
         console.error('❌ Error getGuru:', error);
         return [];
