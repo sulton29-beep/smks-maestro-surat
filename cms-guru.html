@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kelola Guru - SMKS MAESTRO</title>
+    <link rel="stylesheet" href="assets/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo-icon">👨‍🏫</div>
+                <div>
+                    <h1>SMKS MAESTRO</h1>
+                    <p class="subtitle">Kelola Data Guru</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="dashboard.html" class="btn btn-secondary">← Dashboard</a>
+                <a href="index.html" class="btn btn-danger">🚪 Logout</a>
+            </div>
+        </header>
+
+        <!-- Form Tambah Guru -->
+        <section class="form-section">
+            <div class="form-card">
+                <h4>➕ Tambah Guru Baru</h4>
+                <form id="guruForm">
+                    <div class="form-group">
+                        <label for="namaGuru">Nama Guru <span class="required">*</span></label>
+                        <input type="text" id="namaGuru" placeholder="Masukkan nama lengkap guru" required />
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">➕ Tambah Guru</button>
+                        <button type="reset" class="btn btn-secondary">↺ Reset</button>
+                    </div>
+                </form>
+                <div id="guruResult" class="alert" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- Daftar Guru -->
+        <section class="list-section">
+            <h3>📋 Daftar Guru</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Guru</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="guruBody">
+                        <!-- Data akan diisi oleh JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 SLTNET.SMKS.Mst - Sistem Nomor Surat Otomatis</p>
+        </footer>
+    </div>
+
+    <script src="assets/script.js"></script>
+</body>
+</html>

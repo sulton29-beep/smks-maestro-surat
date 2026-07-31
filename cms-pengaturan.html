@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pengaturan - SMKS MAESTRO</title>
+    <link rel="stylesheet" href="assets/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo-icon">⚙️</div>
+                <div>
+                    <h1>SMKS MAESTRO</h1>
+                    <p class="subtitle">Pengaturan Sistem</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="dashboard.html" class="btn btn-secondary">← Dashboard</a>
+                <a href="index.html" class="btn btn-danger">🚪 Logout</a>
+            </div>
+        </header>
+
+        <!-- Informasi Nomor Saat Ini -->
+        <section class="info-section">
+            <div class="info-card">
+                <h4>📊 Informasi Nomor Surat Saat Ini</h4>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Tahun Aktif</span>
+                        <span class="info-value" id="infoTahun">2026</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Nomor Urut Terakhir</span>
+                        <span class="info-value" id="infoNomor">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Total Surat Terbit</span>
+                        <span class="info-value" id="infoTotal">0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 1. Atur Nomor Urut -->
+        <section class="setting-section">
+            <div class="setting-card">
+                <h4>✏️ Atur Nomor Urut Manual</h4>
+                <p class="setting-desc">Gunakan jika ada surat yang batal/tidak jadi, agar nomor tidak loncat.</p>
+                <form id="aturNomorForm">
+                    <div class="form-group">
+                        <label for="nomorBaru">Nomor Urut Baru</label>
+                        <input type="number" id="nomorBaru" placeholder="Contoh: 003" min="0" required />
+                        <small class="form-hint">Masukkan angka tanpa leading zero (contoh: 3 → otomatis jadi 003)</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordAtur">Password Admin</label>
+                        <input type="password" id="passwordAtur" placeholder="Masukkan password admin" required />
+                    </div>
+                    <button type="submit" class="btn btn-warning">💾 Simpan Perubahan</button>
+                </form>
+                <div id="aturNomorResult" class="alert" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- 2. Reset Nomor Urut -->
+        <section class="setting-section">
+            <div class="setting-card setting-danger">
+                <h4>🔄 Reset Nomor Urut</h4>
+                <p class="setting-desc">Reset nomor urut ke 000. Data tahun lalu <strong>TIDAK</strong> akan dihapus.</p>
+                <form id="resetNomorForm">
+                    <div class="form-group">
+                        <label for="passwordReset">Password Admin</label>
+                        <input type="password" id="passwordReset" placeholder="Masukkan password admin" required />
+                    </div>
+                    <button type="submit" class="btn btn-danger">🔄 Reset ke 000</button>
+                </form>
+                <div id="resetNomorResult" class="alert" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- 3. Hapus Data Tahun Lalu -->
+        <section class="setting-section">
+            <div class="setting-card setting-danger">
+                <h4>🗑️ Hapus Data Tahun Lalu</h4>
+                <p class="setting-desc">Hapus semua data surat berdasarkan tahun tertentu. <strong>TINDAKAN INI TIDAK BISA DIBATALKAN!</strong></p>
+                <form id="hapusDataForm">
+                    <div class="form-group">
+                        <label for="tahunHapus">Pilih Tahun</label>
+                        <select id="tahunHapus" required>
+                            <option value="">-- Pilih Tahun --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordHapus">Password Admin</label>
+                        <input type="password" id="passwordHapus" placeholder="Masukkan password admin" required />
+                    </div>
+                    <button type="submit" class="btn btn-danger">🗑️ Hapus Data</button>
+                </form>
+                <div id="hapusDataResult" class="alert" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- 4. Ganti Username/Password -->
+        <section class="setting-section">
+            <div class="setting-card">
+                <h4>🔐 Ganti Username & Password</h4>
+                <form id="gantiAkunForm">
+                    <div class="form-group">
+                        <label for="usernameBaru">Username Baru</label>
+                        <input type="text" id="usernameBaru" placeholder="Masukkan username baru" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordBaru">Password Baru</label>
+                        <input type="password" id="passwordBaru" placeholder="Masukkan password baru" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordLama">Password Lama (Konfirmasi)</label>
+                        <input type="password" id="passwordLama" placeholder="Masukkan password lama" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">💾 Simpan Perubahan</button>
+                </form>
+                <div id="gantiAkunResult" class="alert" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- 5. Log Aktivitas -->
+        <section class="setting-section">
+            <div class="setting-card">
+                <h4>📜 Log Aktivitas</h4>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Aktivitas</th>
+                                <th>Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logBody">
+                            <!-- Data akan diisi oleh JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 SLTNET.SMKS.Mst - Sistem Nomor Surat Otomatis</p>
+        </footer>
+    </div>
+
+    <script src="assets/script.js"></script>
+</body>
+</html>

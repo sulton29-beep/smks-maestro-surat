@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formulir Permintaan Surat - SMKS MAESTRO</title>
+    <link rel="stylesheet" href="assets/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo-icon">📩</div>
+                <div>
+                    <h1>SMKS MAESTRO</h1>
+                    <p class="subtitle">Formulir Permintaan Nomor Surat</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="index.html" class="btn btn-secondary">← Beranda</a>
+            </div>
+        </header>
+
+        <!-- Form -->
+        <section class="form-section">
+            <div class="form-card">
+                <h3>📝 Formulir Permintaan Nomor Surat Keluar</h3>
+                <p class="form-info">Isi data dengan lengkap dan benar. Nomor surat akan muncul setelah disetujui admin.</p>
+
+                <form id="suratForm">
+                    <!-- Nama Guru -->
+                    <div class="form-group">
+                        <label for="guru">Nama Guru <span class="required">*</span></label>
+                        <select id="guru" required>
+                            <option value="">-- Pilih Nama Guru --</option>
+                        </select>
+                    </div>
+
+                    <!-- Kode Surat (Readonly) -->
+                    <div class="form-group">
+                        <label for="kodeSurat">Kode Surat</label>
+                        <input type="text" id="kodeSurat" value="421.5" readonly />
+                        <small class="form-hint">Kode surat default SMKS MAESTRO</small>
+                    </div>
+
+                    <!-- Tanggal Input (Otomatis) -->
+                    <div class="form-group">
+                        <label for="tanggalInput">Tanggal Input</label>
+                        <input type="text" id="tanggalInput" readonly />
+                        <small class="form-hint">Otomatis mengikuti tanggal hari ini</small>
+                    </div>
+
+                    <!-- Surat Untuk -->
+                    <div class="form-group">
+                        <label for="suratUntuk">Surat Untuk <span class="required">*</span></label>
+                        <input type="text" id="suratUntuk" placeholder="Contoh: Yayasan Pendidikan Maestro" required />
+                    </div>
+
+                    <!-- Perihal Surat -->
+                    <div class="form-group">
+                        <label for="perihal">Perihal Surat <span class="required">*</span></label>
+                        <input type="text" id="perihal" placeholder="Contoh: Rapat Wali Murid" required />
+                        <small class="form-hint">Sistem akan membuat singkatan otomatis dari perihal ini</small>
+                    </div>
+
+                    <!-- Tanggal Surat -->
+                    <div class="form-group">
+                        <label for="tanggalSurat">Tanggal Surat <span class="required">*</span></label>
+                        <input type="date" id="tanggalSurat" required />
+                        <small class="form-hint">Pilih tanggal surat (berpengaruh pada bulan Romawi)</small>
+                    </div>
+
+                    <!-- Lokasi Dokumen -->
+                    <div class="form-group">
+                        <label for="lokasiDokumen">Lokasi Dokumen</label>
+                        <input type="text" id="lokasiDokumen" value="Jl.Raya Keramat Pakuhaji Km.3,5 Kayu Agung Kec.Sepatan Kab.Tangerang 15520" />
+                        <small class="form-hint">Dapat diubah jika diperlukan</small>
+                    </div>
+
+                    <!-- Preview Singkatan -->
+                    <div class="preview-box">
+                        <h4>🔍 Preview Format Nomor Surat</h4>
+                        <div class="preview-content">
+                            <span class="preview-label">Kode Surat:</span>
+                            <span id="previewKode">421.5</span>
+                        </div>
+                        <div class="preview-content">
+                            <span class="preview-label">Nomor Urut:</span>
+                            <span id="previewNomor">XXX</span>
+                            <small>(akan otomatis)</small>
+                        </div>
+                        <div class="preview-content">
+                            <span class="preview-label">Singkatan Perihal:</span>
+                            <span id="previewSingkatan">-</span>
+                        </div>
+                        <div class="preview-content">
+                            <span class="preview-label">Bulan Romawi:</span>
+                            <span id="previewBulan">-</span>
+                        </div>
+                        <div class="preview-content preview-result">
+                            <span class="preview-label">Format Akhir:</span>
+                            <span id="previewHasil">421.5/XXX/---/SMKS.Mst/---/2026</span>
+                        </div>
+                        <p class="preview-note">⚠️ Nomor surat akan muncul setelah disetujui admin</p>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success btn-large">📨 Ajukan Surat</button>
+                        <button type="reset" class="btn btn-secondary">↺ Reset</button>
+                    </div>
+                </form>
+
+                <div id="formResult" class="alert" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 SLTNET.SMKS.Mst - Sistem Nomor Surat Otomatis</p>
+        </footer>
+    </div>
+
+    <script src="assets/script.js"></script>
+</body>
+</html>
