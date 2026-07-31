@@ -60,21 +60,49 @@ function showResult(elementId, message, type) {
 }
 
 // --- LOGIN ---
+// ============================================================
+// LOGIN - VERSI TERBARU
+// ============================================================
 async function handleLogin(e) {
-    if (e) e.preventDefault();
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value.trim();
     const errorEl = document.getElementById('loginError');
 
+    console.log('🔍 Mencoba login dengan:', username);
+
+    // Validasi input
+    if (!username || !password) {
+        errorEl.style.display = 'block';
+        errorEl.textContent = '❌ Username dan password wajib diisi!';
+        return;
+    }
+
     try {
-        console.log('🔍 Mencoba login dengan:', username);
-        
+        // Ambil data admin dari Supabase
+        console.log('📡 Mengambil data admin dari database...');
         const admin = await getAdmin();
         console.log('📦 Data admin dari database:', admin);
 
-        if (admin && username === admin.username && password === admin.password) {
+        if (!admin) {
+            errorEl.style.display = 'block';
+            errorEl.textContent = '❌ Data admin tidak ditemukan di database!';
+            return;
+        }
+
+        // Cek username dan password
+        if (username === admin.username && password === admin.password) {
+            console.log('✅ Login berhasil!');
+            
+            // Simpan status login
             localStorage.setItem('admin_logged_in', 'true');
-            console.log('✅ Login berhasil! Redirect ke dashboard...');
+            
+            // Redirect ke dashboard
+            console.log('🔄 Redirect ke dashboard...');
             window.location.href = 'dashboard.html';
         } else {
             console.log('❌ Login gagal: username/password salah');
@@ -84,7 +112,7 @@ async function handleLogin(e) {
     } catch (error) {
         console.error('❌ Error saat login:', error);
         errorEl.style.display = 'block';
-        errorEl.textContent = '❌ Gagal terhubung ke database. Cek koneksi internet.';
+        errorEl.textContent = '❌ Gagal terhubung ke database. Cek koneksi internet dan Console (F12).';
     }
 }
 
