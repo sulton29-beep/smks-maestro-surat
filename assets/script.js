@@ -67,21 +67,25 @@ async function handleLogin(e) {
     const errorEl = document.getElementById('loginError');
 
     try {
+        console.log('🔍 Mencoba login dengan:', username);
+        
+        // Ambil data admin dari Supabase
         const admin = await getAdmin();
-        console.log('Data admin dari database:', admin); // CEK
+        console.log('📦 Data admin dari database:', admin);
 
         if (admin && username === admin.username && password === admin.password) {
             localStorage.setItem('admin_logged_in', 'true');
-            console.log('✅ Login berhasil, redirect ke dashboard...');
-            window.location.href = '/dashboard.html';
+            console.log('✅ Login berhasil! Redirect ke dashboard...');
+            window.location.href = 'dashboard.html';
         } else {
+            console.log('❌ Login gagal: username/password salah');
             errorEl.style.display = 'block';
             errorEl.textContent = '❌ Username atau password salah!';
         }
     } catch (error) {
-        console.error('Error login:', error);
+        console.error('❌ Error saat login:', error);
         errorEl.style.display = 'block';
-        errorEl.textContent = '❌ Terjadi kesalahan koneksi ke database. Cek Console (F12) untuk detail.';
+        errorEl.textContent = '❌ Gagal terhubung ke database. Cek koneksi internet.';
     }
 }
 
