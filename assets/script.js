@@ -63,6 +63,9 @@ function showResult(elementId, message, type) {
 // ============================================================
 // LOGIN - VERSI TERBARU
 // ============================================================
+// ============================================================
+// LOGIN
+// ============================================================
 async function handleLogin(e) {
     if (e) {
         e.preventDefault();
@@ -75,7 +78,6 @@ async function handleLogin(e) {
 
     console.log('🔍 Mencoba login dengan:', username);
 
-    // Validasi input
     if (!username || !password) {
         errorEl.style.display = 'block';
         errorEl.textContent = '❌ Username dan password wajib diisi!';
@@ -83,10 +85,9 @@ async function handleLogin(e) {
     }
 
     try {
-        // Ambil data admin dari Supabase
-        console.log('📡 Mengambil data admin dari database...');
+        console.log('📡 Mengambil data admin...');
         const admin = await getAdmin();
-        console.log('📦 Data admin dari database:', admin);
+        console.log('📦 Data admin:', admin);
 
         if (!admin) {
             errorEl.style.display = 'block';
@@ -94,27 +95,32 @@ async function handleLogin(e) {
             return;
         }
 
-        // Cek username dan password
         if (username === admin.username && password === admin.password) {
             console.log('✅ Login berhasil!');
-            
-            // Simpan status login
             localStorage.setItem('admin_logged_in', 'true');
-            
-            // Redirect ke dashboard
             console.log('🔄 Redirect ke dashboard...');
-            window.location.href = 'dashboard.html';
+            window.location.replace('dashboard.html');
         } else {
-            console.log('❌ Login gagal: username/password salah');
             errorEl.style.display = 'block';
             errorEl.textContent = '❌ Username atau password salah!';
         }
     } catch (error) {
-        console.error('❌ Error saat login:', error);
+        console.error('❌ Error:', error);
         errorEl.style.display = 'block';
-        errorEl.textContent = '❌ Gagal terhubung ke database. Cek koneksi internet dan Console (F12).';
+        errorEl.textContent = '❌ Gagal terhubung ke database: ' + error.message;
     }
 }
+
+// Pastikan event listener terpasang
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        console.log('✅ Form login ditemukan, memasang event listener...');
+        loginForm.addEventListener('submit', handleLogin);
+    } else {
+        console.log('❌ Form login tidak ditemukan!');
+    }
+});
 
 // --- DASHBOARD ---
 // --- DASHBOARD ---

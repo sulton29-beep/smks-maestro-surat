@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login Admin - SMKS MAESTRO</title>
     <link rel="stylesheet" href="assets/style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
     <div class="container login-container">
@@ -27,9 +26,7 @@
                     <input type="password" id="password" placeholder="Masukkan password" required />
                 </div>
 
-                <div id="loginError" class="alert alert-danger" style="display:none;">
-                    ❌ Username atau password salah!
-                </div>
+                <div id="loginError" class="alert alert-danger" style="display:none;"></div>
 
                 <button type="submit" class="btn btn-primary btn-full">Login</button>
             </form>
@@ -40,7 +37,6 @@
         </div>
     </div>
 
-    <!-- PASTIKAN INI ADA! -->
     <script src="assets/supabase-config.js"></script>
     <script src="assets/script.js"></script>
 </body>
