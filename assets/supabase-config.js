@@ -1,8 +1,8 @@
 // ============================================================
-// KONFIGURASI SUPABASE - GANTI DENGAN PUNYA ANDA
+// KONFIGURASI SUPABASE - SUDAH BENAR!
 // ============================================================
-const SUPABASE_URL = 'https://nuscvbuoqejmffozhzm.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_q4ieU2qJBLBRU1azwvDuw_AcNn11HW';
+const SUPABASE_URL = 'https://nuscvbuoqejmnffozhzm.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_q4ieU2qJBlIBRUlazwvDuw_AcNn11HW';
 
 // ============================================================
 // FUNGSI DASAR UNTUK AKSES SUPABASE
