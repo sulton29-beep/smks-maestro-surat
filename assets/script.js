@@ -119,12 +119,24 @@ function handleLogin(e) {
     const errorEl = document.getElementById('loginError');
 
     const data = getData();
-    if (username === data.admin.username && password === data.admin.password) {
-        localStorage.setItem('admin_logged_in', 'true');
-        window.location.href = 'dashboard.html';
+    console.log('Data dari localStorage:', data); // CEK DATA
+
+    if (data && data.admin) {
+        console.log('Username dari form:', username);
+        console.log('Username dari data:', data.admin.username);
+        console.log('Password dari form:', password);
+        console.log('Password dari data:', data.admin.password);
+
+        if (username === data.admin.username && password === data.admin.password) {
+            localStorage.setItem('admin_logged_in', 'true');
+            window.location.href = 'dashboard.html';
+        } else {
+            errorEl.style.display = 'block';
+            errorEl.textContent = '❌ Username atau password salah!';
+        }
     } else {
         errorEl.style.display = 'block';
-        errorEl.textContent = '❌ Username atau password salah!';
+        errorEl.textContent = '❌ Data admin tidak ditemukan. Jalankan inisialisasi data!';
     }
 }
 
