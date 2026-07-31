@@ -1,0 +1,10 @@
+{
+  "name": "SMKS MAESTRO - Sistem Nomor Surat Otomatis",
+  "short_name": "SMKS MAESTRO",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f0f4f8",
+  "theme_color": "#667eea",
+  "description": "Sistem Nomor Surat Otomatis untuk SMKS MAESTRO",
+  "icons": []
+}
