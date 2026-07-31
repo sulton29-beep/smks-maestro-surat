@@ -171,14 +171,21 @@ function renderPermintaan(permintaan) {
 
 // --- PERMINTAAN SURAT (Guru) ---
 async function loadFormSurat() {
+    console.log('🔄 Memuat form surat...');
     try {
         const daftarGuru = await getGuru();
+        console.log('📋 Daftar guru dari database:', daftarGuru);
+        
         const guruSelect = document.getElementById('guru');
         if (guruSelect) {
             guruSelect.innerHTML = '<option value="">-- Pilih Nama Guru --</option>';
-            daftarGuru.forEach(g => {
-                guruSelect.innerHTML += `<option value="${g.nama}">${g.nama}</option>`;
-            });
+            if (daftarGuru && daftarGuru.length > 0) {
+                daftarGuru.forEach(g => {
+                    guruSelect.innerHTML += `<option value="${g.nama}">${g.nama}</option>`;
+                });
+            } else {
+                guruSelect.innerHTML += '<option value="" disabled>Belum ada guru</option>';
+            }
         }
 
         const today = new Date();
@@ -210,8 +217,8 @@ async function loadFormSurat() {
         updatePreview();
 
     } catch (error) {
-        console.error('Error load form:', error);
-        alert('Gagal memuat data guru. Periksa koneksi internet.');
+        console.error('❌ Error load form:', error);
+        alert('Gagal memuat data guru. Periksa koneksi internet dan cek Console (F12).');
     }
 }
 
