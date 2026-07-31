@@ -68,9 +68,12 @@ async function handleLogin(e) {
 
     try {
         const admin = await getAdmin();
+        console.log('Data admin dari database:', admin); // CEK
+
         if (admin && username === admin.username && password === admin.password) {
             localStorage.setItem('admin_logged_in', 'true');
-            window.location.href = 'dashboard.html';
+            console.log('✅ Login berhasil, redirect ke dashboard...');
+            window.location.href = '/dashboard.html';
         } else {
             errorEl.style.display = 'block';
             errorEl.textContent = '❌ Username atau password salah!';
@@ -78,7 +81,7 @@ async function handleLogin(e) {
     } catch (error) {
         console.error('Error login:', error);
         errorEl.style.display = 'block';
-        errorEl.textContent = '❌ Terjadi kesalahan koneksi ke database.';
+        errorEl.textContent = '❌ Terjadi kesalahan koneksi ke database. Cek Console (F12) untuk detail.';
     }
 }
 
