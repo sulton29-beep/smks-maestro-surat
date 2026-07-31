@@ -89,6 +89,7 @@ async function handleLogin(e) {
 }
 
 // --- DASHBOARD ---
+// --- DASHBOARD ---
 async function loadDashboard() {
     if (!localStorage.getItem('admin_logged_in')) {
         window.location.href = 'login.html';
@@ -96,7 +97,9 @@ async function loadDashboard() {
     }
 
     try {
+        // Panggil fungsi getPermintaan dari supabase-config.js
         const permintaan = await getPermintaan();
+        console.log('📋 Data permintaan:', permintaan);
         
         const total = permintaan.length;
         const menunggu = permintaan.filter(p => p.status === 'menunggu').length;
@@ -129,7 +132,7 @@ async function loadDashboard() {
         });
 
     } catch (error) {
-        console.error('Error load dashboard:', error);
+        console.error('❌ Error load dashboard:', error);
         alert('Gagal memuat data. Periksa koneksi internet.');
     }
 }
