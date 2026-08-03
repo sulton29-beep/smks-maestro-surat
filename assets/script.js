@@ -1,6 +1,169 @@
 // ============================================================
-// SMKS MAESTRO - SCRIPT UTAMA DENGAN SUPABASE
+// SMKS MAESTRO - SISTEM NOMOR SURAT OTOMATIS (TANPA DATABASE)
 // ============================================================
+
+// --- KONFIGURASI ---
+const ADMIN_USERNAME = 'admin';
+const ADMIN_PASSWORD = 'admin123';
+const STORAGE_KEY = 'smks_maestro_data';
+
+// --- DATA DEFAULT ---
+function getDefaultData() {
+    return {
+        guru: [
+            'SITI ZULHULAIFAH',
+            'SENENG KURNIATI, S.Pd',
+            'NENENG SUSANTI, S.Pd',
+            'LUSI KARTIKA, S.Pd',
+            'IIN MARLINA, S.Pd',
+            'DESSY NURMALASARI, S.Pd.',
+            'DEWI ARISYANDI, S.Pd',
+            'VIVI WAHYUNI, S.Pd',
+            'TIA ROSLEINA, S.Pd.',
+            'SITI ELIYAWATI, S.Pd.',
+            'TESYA HASAN ZEIN MAHMUD, S.T',
+            'ABDUL KADIR ZAELANI',
+            'RONI VEBRINO, S.Kom',
+            'IDZA TAZALLA',
+            'TEGUH PRIYONO, S.T',
+            'HILMAN MOCHAMMAD FAUZI, S.KOM',
+            'SULTON HASANUDIN',
+            'AHMAD YAYAN SOPIYAN, S.T'
+        ],
+        permintaan: [],
+        log: [],
+        nomor_terakhir: { tahun: '2026', nomor: 0 }
+    };
+}
+
+// --- FUNGSI CRUD DATA ---
+function getData() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            const data = JSON.parse(raw);
+            // Pastikan semua key ada
+            const defaultData = getDefaultData();
+            for (const key in defaultData) {
+                if (!(key in data)) {
+                    data[key] = defaultData[key];
+                }
+            }
+            return data;
+        }
+    } catch (e) {
+        console.error('Error baca data:', e);
+    }
+    // Jika belum ada data, buat default
+    const defaultData = getDefaultData();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
+    return defaultData;
+}
+
+function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// --- FUNGSI GURU ---
+function getGuru() {
+    const data = getData();
+    return data.guru || [];
+}
+
+function tambahGuru(nama) {
+    const data = getData();
+    if (!data.guru.includes(nama)) {
+        data.guru.push(nama);
+        saveData(data);
+        return true;
+    }
+    return false;
+}
+
+function hapusGuru(nama) {
+    const data = getData();
+    data.guru = data.guru.filter(g => g !== nama);
+    saveData(data);
+}
+
+// --- FUNGSI PERMINTAAN ---
+function getPermintaan() {
+    const data = getData();
+    return data.permintaan || [];
+}
+
+function tambahPermintaan(permintaan) {
+    const data = getData();
+    data.permintaan.push(permintaan);
+    data.nomor_terakhir.nomor = permintaan.nomor_urut;
+    saveData(data);
+}
+
+function updatePermintaan(id, updates) {
+    const data = getData();
+    const index = data.permintaan.findIndex(p => p.id === id);
+    if (index !== -1) {
+        data.permintaan[index] = { ...data.permintaan[index], ...updates };
+        saveData(data);
+        return true;
+    }
+    return false;
+}
+
+// --- FUNGSI LOG ---
+function tambahLog(aktivitas, admin = 'Admin') {
+    const data = getData();
+    const tanggal = new Date().toLocaleDateString('id-ID');
+    const waktu = new Date().toLocaleTimeString('id-ID');
+    data.log.push({ tanggal, waktu, aktivitas, admin });
+    saveData(data);
+}
+
+function getLog() {
+    const data = getData();
+    return data.log || [];
+}
+
+// --- FUNGSI PENGATURAN ---
+function getPengaturan() {
+    const data = getData();
+    return data.nomor_terakhir || { tahun: '2026', nomor: 0 };
+}
+
+function updatePengaturan(nomor_terakhir) {
+    const data = getData();
+    data.nomor_terakhir.nomor = nomor_terakhir;
+    saveData(data);
+}
+
+// --- FUNGSI WHATSAPP (Fonnte) ---
+async function kirimWhatsApp(pesan) {
+    // Jika ingin pakai WhatsApp, daftar di fonnte.com dan isi API Key di sini
+    // const WHATSAPP_API_KEY = 'PASTE_API_KEY_ANDA';
+    // const WHATSAPP_NOMOR = '089674280380';
+    
+    console.log('📱 [WhatsApp] Pesan:', pesan);
+    alert('📱 WhatsApp terkirim! (Simulasi)\n\nPesan:\n' + pesan);
+    
+    // Buka kode di bawah jika sudah punya API Key
+    /*
+    try {
+        const response = await fetch('https://api.fonnte.com/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                target: WHATSAPP_NOMOR,
+                message: pesan,
+                countryCode: '62'
+            })
+        });
+        const result = await response.json();
+        console.log('✅ WhatsApp terkirim:', result);
+    } catch (error) {
+        console.error('❌ Gagal kirim WA:', error);
+    }
+    */
+}
 
 // --- UTILITY ---
 function formatDate(date) {
@@ -60,115 +223,63 @@ function showResult(elementId, message, type) {
 }
 
 // --- LOGIN ---
-// ============================================================
-// LOGIN - VERSI TERBARU
-// ============================================================
-// ============================================================
-// LOGIN
-// ============================================================
-async function handleLogin(e) {
-    if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-    
+function handleLogin(e) {
+    if (e) e.preventDefault();
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value.trim();
     const errorEl = document.getElementById('loginError');
 
-    console.log('🔍 Mencoba login dengan:', username);
+    // Cek dari localStorage (jika admin sudah ganti)
+    const savedUsername = localStorage.getItem('admin_username') || ADMIN_USERNAME;
+    const savedPassword = localStorage.getItem('admin_password') || ADMIN_PASSWORD;
 
-    if (!username || !password) {
+    if (username === savedUsername && password === savedPassword) {
+        localStorage.setItem('admin_logged_in', 'true');
+        window.location.href = 'dashboard.html';
+    } else {
         errorEl.style.display = 'block';
-        errorEl.textContent = '❌ Username dan password wajib diisi!';
-        return;
-    }
-
-    try {
-        console.log('📡 Mengambil data admin...');
-        const admin = await getAdmin();
-        console.log('📦 Data admin:', admin);
-
-        if (!admin) {
-            errorEl.style.display = 'block';
-            errorEl.textContent = '❌ Data admin tidak ditemukan di database!';
-            return;
-        }
-
-        if (username === admin.username && password === admin.password) {
-            console.log('✅ Login berhasil!');
-            localStorage.setItem('admin_logged_in', 'true');
-            console.log('🔄 Redirect ke dashboard...');
-            window.location.replace('dashboard.html');
-        } else {
-            errorEl.style.display = 'block';
-            errorEl.textContent = '❌ Username atau password salah!';
-        }
-    } catch (error) {
-        console.error('❌ Error:', error);
-        errorEl.style.display = 'block';
-        errorEl.textContent = '❌ Gagal terhubung ke database: ' + error.message;
+        errorEl.textContent = '❌ Username atau password salah!';
     }
 }
 
-// Pastikan event listener terpasang
-document.addEventListener('DOMContentLoaded', function() {
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        console.log('✅ Form login ditemukan, memasang event listener...');
-        loginForm.addEventListener('submit', handleLogin);
-    } else {
-        console.log('❌ Form login tidak ditemukan!');
-    }
-});
-
 // --- DASHBOARD ---
-// --- DASHBOARD ---
-async function loadDashboard() {
+function loadDashboard() {
     if (!localStorage.getItem('admin_logged_in')) {
         window.location.href = 'login.html';
         return;
     }
 
-    try {
-        // Panggil fungsi getPermintaan dari supabase-config.js
-        const permintaan = await getPermintaan();
-        console.log('📋 Data permintaan:', permintaan);
-        
-        const total = permintaan.length;
-        const menunggu = permintaan.filter(p => p.status === 'menunggu').length;
-        const disetujui = permintaan.filter(p => p.status === 'disetujui').length;
-        const ditolak = permintaan.filter(p => p.status === 'ditolak').length;
+    const permintaan = getPermintaan();
+    
+    const total = permintaan.length;
+    const menunggu = permintaan.filter(p => p.status === 'menunggu').length;
+    const disetujui = permintaan.filter(p => p.status === 'disetujui').length;
+    const ditolak = permintaan.filter(p => p.status === 'ditolak').length;
 
-        document.getElementById('statTotal').textContent = total;
-        document.getElementById('statMenunggu').textContent = menunggu;
-        document.getElementById('statDisetujui').textContent = disetujui;
-        document.getElementById('statDitolak').textContent = ditolak;
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statMenunggu').textContent = menunggu;
+    document.getElementById('statDisetujui').textContent = disetujui;
+    document.getElementById('statDitolak').textContent = ditolak;
 
-        renderPermintaan(permintaan);
+    renderPermintaan(permintaan);
 
-        document.querySelectorAll('.btn-filter').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                const filter = this.dataset.filter;
-                let filtered = permintaan;
-                if (filter !== 'semua') {
-                    filtered = permintaan.filter(p => p.status === filter);
-                }
-                renderPermintaan(filtered);
-            });
+    document.querySelectorAll('.btn-filter').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const filter = this.dataset.filter;
+            let filtered = permintaan;
+            if (filter !== 'semua') {
+                filtered = permintaan.filter(p => p.status === filter);
+            }
+            renderPermintaan(filtered);
         });
+    });
 
-        document.getElementById('exportExcel').addEventListener('click', function(e) {
-            e.preventDefault();
-            exportToExcel(permintaan);
-        });
-
-    } catch (error) {
-        console.error('❌ Error load dashboard:', error);
-        alert('Gagal memuat data. Periksa koneksi internet.');
-    }
+    document.getElementById('exportExcel').addEventListener('click', function(e) {
+        e.preventDefault();
+        exportToExcel(permintaan);
+    });
 }
 
 function renderPermintaan(permintaan) {
@@ -206,100 +317,81 @@ function renderPermintaan(permintaan) {
     tbody.innerHTML = html;
 }
 
-// --- PERMINTAAN SURAT (Guru) ---
-// --- PERMINTAAN SURAT (Guru) ---
-async function loadFormSurat() {
-    console.log('🔄 Memuat form surat...');
-    try {
-        const daftarGuru = await getGuru();
-        console.log('📋 Daftar guru dari database:', daftarGuru);
-        
-        const guruSelect = document.getElementById('guru');
-        if (guruSelect) {
-            guruSelect.innerHTML = '<option value="">-- Pilih Nama Guru --</option>';
-            if (daftarGuru && daftarGuru.length > 0) {
-                daftarGuru.forEach(g => {
-                    guruSelect.innerHTML += `<option value="${g.nama}">${g.nama}</option>`;
-                });
-                console.log('✅ Dropdown guru terisi:', daftarGuru.length, 'guru');
-            } else {
-                guruSelect.innerHTML += '<option value="" disabled>❌ Belum ada guru di database</option>';
-                console.warn('⚠️ Tidak ada data guru!');
-            }
-        }
-
-        // === PERBAIKI TANGGAL INPUT ===
-        const today = new Date();
-        const tanggalInput = document.getElementById('tanggalInput');
-        if (tanggalInput) {
-            tanggalInput.value = formatDate(today);
-            console.log('📅 Tanggal input diisi:', tanggalInput.value);
-        }
-
-        const lokasiInput = document.getElementById('lokasiDokumen');
-        if (lokasiInput && !lokasiInput.value) {
-            lokasiInput.value = 'Jl.Raya Keramat Pakuhaji Km.3,5 Kayu Agung Kec.Sepatan Kab.Tangerang 15520';
-        }
-
-        const perihalInput = document.getElementById('perihal');
-        const tanggalSuratInput = document.getElementById('tanggalSurat');
-        
-        if (perihalInput) {
-            perihalInput.addEventListener('input', updatePreview);
-        }
-        if (tanggalSuratInput) {
-            tanggalSuratInput.addEventListener('change', updatePreview);
-        }
-
-        const form = document.getElementById('suratForm');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                ajukanSurat();
+// --- FORM SURAT ---
+function loadFormSurat() {
+    const daftarGuru = getGuru();
+    const guruSelect = document.getElementById('guru');
+    if (guruSelect) {
+        guruSelect.innerHTML = '<option value="">-- Pilih Nama Guru --</option>';
+        if (daftarGuru && daftarGuru.length > 0) {
+            daftarGuru.forEach(g => {
+                guruSelect.innerHTML += `<option value="${g}">${g}</option>`;
             });
+        } else {
+            guruSelect.innerHTML += '<option value="" disabled>❌ Belum ada guru</option>';
         }
-
-        updatePreview();
-
-    } catch (error) {
-        console.error('❌ Error load form:', error);
-        alert('Gagal memuat data guru. Periksa koneksi internet dan cek Console (F12).');
     }
+
+    const today = new Date();
+    const tanggalInput = document.getElementById('tanggalInput');
+    if (tanggalInput) {
+        tanggalInput.value = formatDate(today);
+    }
+
+    const lokasiInput = document.getElementById('lokasiDokumen');
+    if (lokasiInput && !lokasiInput.value) {
+        lokasiInput.value = 'Jl.Raya Keramat Pakuhaji Km.3,5 Kayu Agung Kec.Sepatan Kab.Tangerang 15520';
+    }
+
+    const perihalInput = document.getElementById('perihal');
+    const tanggalSuratInput = document.getElementById('tanggalSurat');
+    
+    if (perihalInput) {
+        perihalInput.addEventListener('input', updatePreview);
+    }
+    if (tanggalSuratInput) {
+        tanggalSuratInput.addEventListener('change', updatePreview);
+    }
+
+    const form = document.getElementById('suratForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            ajukanSurat();
+        });
+    }
+
+    updatePreview();
 }
 
-async function updatePreview() {
+function updatePreview() {
     const perihal = document.getElementById('perihal').value.trim();
     const tanggalSurat = document.getElementById('tanggalSurat').value;
     const kodeSurat = document.getElementById('kodeSurat').value || '421.5';
 
-    try {
-        const pengaturan = await getPengaturan();
-        const nomorUrut = pengaturan.nomor_terakhir + 1;
+    const pengaturan = getPengaturan();
+    const nomorUrut = pengaturan.nomor + 1;
 
-        const singkatan = perihal ? singkatPerihal(perihal) : '---';
-        document.getElementById('previewSingkatan').textContent = singkatan;
+    const singkatan = perihal ? singkatPerihal(perihal) : '---';
+    document.getElementById('previewSingkatan').textContent = singkatan;
 
-        if (tanggalSurat) {
-            const date = new Date(tanggalSurat);
-            const bulanRomawi = getBulanRomawi(date.getMonth());
-            const tahun = date.getFullYear();
-            document.getElementById('previewBulan').textContent = `${bulanRomawi} (${tahun})`;
-            document.getElementById('previewHasil').textContent = 
-                generateNomorSurat(kodeSurat, 'XXX', singkatan, tahun, bulanRomawi);
-        } else {
-            document.getElementById('previewBulan').textContent = '-';
-            document.getElementById('previewHasil').textContent = `${kodeSurat}/XXX/${singkatan}/SMKS.Mst/---/2026`;
-        }
-
-        document.getElementById('previewNomor').textContent = String(nomorUrut).padStart(3, '0');
-        document.getElementById('previewKode').textContent = kodeSurat;
-
-    } catch (error) {
-        console.error('Error update preview:', error);
+    if (tanggalSurat) {
+        const date = new Date(tanggalSurat);
+        const bulanRomawi = getBulanRomawi(date.getMonth());
+        const tahun = date.getFullYear();
+        document.getElementById('previewBulan').textContent = `${bulanRomawi} (${tahun})`;
+        document.getElementById('previewHasil').textContent = 
+            generateNomorSurat(kodeSurat, 'XXX', singkatan, tahun, bulanRomawi);
+    } else {
+        document.getElementById('previewBulan').textContent = '-';
+        document.getElementById('previewHasil').textContent = `${kodeSurat}/XXX/${singkatan}/SMKS.Mst/---/2026`;
     }
+
+    document.getElementById('previewNomor').textContent = String(nomorUrut).padStart(3, '0');
+    document.getElementById('previewKode').textContent = kodeSurat;
 }
 
-async function ajukanSurat() {
+function ajukanSurat() {
     const guru = document.getElementById('guru').value;
     const kodeSurat = document.getElementById('kodeSurat').value;
     const suratUntuk = document.getElementById('suratUntuk').value.trim();
@@ -312,149 +404,113 @@ async function ajukanSurat() {
         return;
     }
 
-    try {
-        const pengaturan = await getPengaturan();
-        const nomorUrut = pengaturan.nomor_terakhir + 1;
-        const date = new Date(tanggalSurat);
-        const bulanRomawi = getBulanRomawi(date.getMonth());
-        const tahun = date.getFullYear();
-        const singkatan = singkatPerihal(perihal);
+    const pengaturan = getPengaturan();
+    const nomorUrut = pengaturan.nomor + 1;
+    const date = new Date(tanggalSurat);
+    const bulanRomawi = getBulanRomawi(date.getMonth());
+    const tahun = date.getFullYear();
+    const singkatan = singkatPerihal(perihal);
 
-        const data = {
-            guru: guru,
-            kode_surat: kodeSurat,
-            tanggal_input: formatDate(new Date()),
-            surat_untuk: suratUntuk,
-            perihal: perihal,
-            tanggal_surat: formatDateFull(tanggalSurat),
-            lokasi_dokumen: lokasiDokumen || 'Jl.Raya Keramat Pakuhaji Km.3,5 Kayu Agung Kec.Sepatan Kab.Tangerang 15520',
-            nomor_urut: nomorUrut,
-            bulan_romawi: bulanRomawi,
-            tahun: tahun,
-            singkatan: singkatan,
-            nomor_surat: null,
-            status: 'menunggu'
-        };
+    const permintaan = {
+        id: Date.now().toString(),
+        guru: guru,
+        kode_surat: kodeSurat,
+        tanggal_input: formatDate(new Date()),
+        surat_untuk: suratUntuk,
+        perihal: perihal,
+        tanggal_surat: formatDateFull(tanggalSurat),
+        lokasi_dokumen: lokasiDokumen || 'Jl.Raya Keramat Pakuhaji Km.3,5 Kayu Agung Kec.Sepatan Kab.Tangerang 15520',
+        nomor_urut: nomorUrut,
+        bulan_romawi: bulanRomawi,
+        tahun: tahun,
+        singkatan: singkatan,
+        nomor_surat: null,
+        status: 'menunggu'
+    };
 
-        await tambahPermintaan(data);
-        await tambahLog(`Permintaan surat dari ${guru} - ${perihal}`);
+    tambahPermintaan(permintaan);
+    tambahLog(`Permintaan surat dari ${guru} - ${perihal}`);
 
-        document.getElementById('suratForm').reset();
-        document.getElementById('tanggalInput').value = formatDate(new Date());
-        document.getElementById('lokasiDokumen').value = 'Jl.Raya Keramat Pakuhaji Km.3,5 Kayu Agung Kec.Sepatan Kab.Tangerang 15520';
-        updatePreview();
+    // Kirim WhatsApp
+    const pesanWA = `📨 Permintaan Nomor Surat Baru!\n\n👤 Guru: ${guru}\n📝 Perihal: ${perihal}\n🏢 Untuk: ${suratUntuk}\n📅 Tanggal: ${formatDateFull(tanggalSurat)}\n\n⏳ Status: Menunggu persetujuan admin.\n🔗 Login untuk setujui: https://nsosmksmaestro.netlify.app/login`;
+    kirimWhatsApp(pesanWA);
 
-        showResult('formResult', 
-            `✅ Permintaan nomor surat berhasil diajukan!<br>
-             <strong>Nama:</strong> ${guru}<br>
-             <strong>Perihal:</strong> ${perihal}<br>
-             <strong>Status:</strong> Menunggu persetujuan admin<br>
-             <br>
-             ⏳ Silakan tunggu admin menyetujui permintaan Anda.`,
-            'success'
-        );
+    document.getElementById('suratForm').reset();
+    document.getElementById('tanggalInput').value = formatDate(new Date());
+    document.getElementById('lokasiDokumen').value = 'Jl.Raya Keramat Pakuhaji Km.3,5 Kayu Agung Kec.Sepatan Kab.Tangerang 15520';
+    updatePreview();
 
-    } catch (error) {
-        console.error('Error ajukan surat:', error);
-        showResult('formResult', '❌ Gagal mengajukan surat. Periksa koneksi internet.', 'danger');
-    }
+    showResult('formResult', 
+        `✅ Permintaan nomor surat berhasil diajukan!<br>
+         <strong>Nama:</strong> ${guru}<br>
+         <strong>Perihal:</strong> ${perihal}<br>
+         <strong>Status:</strong> Menunggu persetujuan admin<br>
+         <br>
+         ⏳ Silakan tunggu admin menyetujui permintaan Anda.`,
+        'success'
+    );
 }
 
 // --- ADMIN ACTIONS ---
-async function setujuiPermintaan(id) {
+function setujuiPermintaan(id) {
     if (!confirm('Setujui permintaan surat ini?')) return;
 
-    try {
-        const permintaan = await getPermintaan();
-        const p = permintaan.find(item => String(item.id) === String(id));
-        if (!p || p.status !== 'menunggu') return;
+    const permintaan = getPermintaan();
+    const p = permintaan.find(item => item.id === id);
+    if (!p || p.status !== 'menunggu') return;
 
-        const nomorSurat = generateNomorSurat(
-            p.kode_surat || '421.5',
-            p.nomor_urut,
-            p.singkatan,
-            p.tahun,
-            p.bulan_romawi
-        );
+    const nomorSurat = generateNomorSurat(
+        p.kode_surat || '421.5',
+        p.nomor_urut,
+        p.singkatan,
+        p.tahun,
+        p.bulan_romawi
+    );
 
-        await updatePermintaan(id, {
-            status: 'disetujui',
-            nomor_surat: nomorSurat
-        });
-        await updatePengaturan({ nomor_terakhir: p.nomor_urut });
-        await tambahLog(`Menyetujui surat ${nomorSurat}`);
+    updatePermintaan(id, {
+        status: 'disetujui',
+        nomor_surat: nomorSurat
+    });
+    updatePengaturan(p.nomor_urut);
+    tambahLog(`Menyetujui surat ${nomorSurat}`);
 
-        kirimWhatsApp({ ...p, nomor_surat: nomorSurat });
+    // Kirim WhatsApp
+    const pesanWA = `📨 Nomor Surat Telah Disetujui!\n\n📌 Nomor Surat: ${nomorSurat}\n👤 Guru: ${p.guru}\n📝 Perihal: ${p.perihal}\n🏢 Untuk: ${p.surat_untuk}\n📅 Tanggal: ${p.tanggal_surat}`;
+    kirimWhatsApp(pesanWA);
 
-        loadDashboard();
-        alert(`✅ Surat ${nomorSurat} telah disetujui!`);
-
-    } catch (error) {
-        console.error('Error setujui:', error);
-        alert('Gagal menyetujui surat.');
-    }
+    loadDashboard();
+    alert(`✅ Surat ${nomorSurat} telah disetujui!`);
 }
 
-async function tolakPermintaan(id) {
+function tolakPermintaan(id) {
     const alasan = prompt('Masukkan alasan penolakan:');
     if (alasan === null || !alasan.trim()) return;
 
-    try {
-        const permintaan = await getPermintaan();
-        const p = permintaan.find(item => String(item.id) === String(id));
-        if (!p || p.status !== 'menunggu') return;
+    const permintaan = getPermintaan();
+    const p = permintaan.find(item => item.id === id);
+    if (!p || p.status !== 'menunggu') return;
 
-        await updatePermintaan(id, {
-            status: 'ditolak',
-            alasan_tolak: alasan.trim()
-        });
-        await tambahLog(`Menolak surat dari ${p.guru} - ${alasan}`);
+    updatePermintaan(id, {
+        status: 'ditolak',
+        alasan_tolak: alasan.trim()
+    });
+    tambahLog(`Menolak surat dari ${p.guru} - ${alasan}`);
 
-        loadDashboard();
-        alert(`❌ Surat dari ${p.guru} telah ditolak.`);
+    // Kirim WhatsApp
+    const pesanWA = `❌ Surat Ditolak!\n\n👤 Guru: ${p.guru}\n📝 Perihal: ${p.perihal}\n📋 Alasan: ${alasan}`;
+    kirimWhatsApp(pesanWA);
 
-    } catch (error) {
-        console.error('Error tolak:', error);
-        alert('Gagal menolak surat.');
-    }
-}
-
-// --- WHATSAPP SIMULASI ---
-function kirimWhatsApp(data) {
-    const nomorWA = '089674280380';
-    const pesan = `
-📨 Nomor Surat Telah Disetujui!
-
-━━━━━━━━━━━━━━━━━━━━━━━
-📋 Detail Surat:
-━━━━━━━━━━━━━━━━━━━━━━━
-📌 Nomor Surat : ${data.nomor_surat}
-👤 Diajukan oleh: ${data.guru}
-🏢 Surat Untuk : ${data.surat_untuk}
-📝 Perihal : ${data.perihal}
-📅 Tanggal Surat : ${data.tanggal_surat}
-📍 Lokasi : ${data.lokasi_dokumen}
-
-━━━━━━━━━━━━━━━━━━━━━━━
-✅ Status: DISETUJUI
-🕐 Disetujui pada: ${formatDate(new Date())} ${new Date().toLocaleTimeString()}
-━━━━━━━━━━━━━━━━━━━━━━━
-    `.trim();
-
-    console.log('📱 [WhatsApp] Mengirim ke:', nomorWA);
-    console.log('📝 Pesan:', pesan);
-    alert(`📱 WhatsApp terkirim ke ${nomorWA}\nNomor Surat: ${data.nomor_surat}`);
+    loadDashboard();
+    alert(`❌ Surat dari ${p.guru} telah ditolak.`);
 }
 
 // --- CMS GURU ---
-// --- CMS GURU ---
-async function loadCMSGuru() {
+function loadCMSGuru() {
     if (!localStorage.getItem('admin_logged_in')) {
         window.location.href = 'login.html';
         return;
     }
-    console.log('🔄 Memuat halaman kelola guru...');
-    await renderGuruList();
+    renderGuruList();
 
     const form = document.getElementById('guruForm');
     if (form) {
@@ -465,100 +521,97 @@ async function loadCMSGuru() {
     }
 }
 
-async function renderGuruList() {
-    console.log('🔄 renderGuruList() dipanggil...');
-    try {
-        const daftarGuru = await getGuru();
-        console.log('📋 Data guru untuk CMS:', daftarGuru);
-        
-        const tbody = document.getElementById('guruBody');
-        if (!tbody) {
-            console.error('❌ Elemen guruBody tidak ditemukan!');
-            return;
-        }
+function renderGuruList() {
+    const daftarGuru = getGuru();
+    const tbody = document.getElementById('guruBody');
+    if (!tbody) return;
 
-        if (!daftarGuru || daftarGuru.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#a0aec0;padding:30px;">Belum ada guru</td></tr>`;
-            return;
-        }
+    if (daftarGuru.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#a0aec0;padding:30px;">Belum ada guru</td></tr>`;
+        return;
+    }
 
-        let html = '';
-        daftarGuru.forEach((g, index) => {
-            html += `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${g.nama}</td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" onclick="hapusGuru('${g.id}')">Hapus</button>
-                    </td>
-                </tr>
-            `;
-        });
-        tbody.innerHTML = html;
-        console.log(`✅ ${daftarGuru.length} guru ditampilkan di CMS`);
+    let html = '';
+    daftarGuru.forEach((g, index) => {
+        html += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${g}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="hapusGuru('${g}')">Hapus</button>
+                </td>
+            </tr>
+        `;
+    });
+    tbody.innerHTML = html;
+}
 
-    } catch (error) {
-        console.error('❌ Error render guru:', error);
-        alert('Gagal memuat data guru. Periksa koneksi internet.');
+function tambahGuru() {
+    const nama = document.getElementById('namaGuru').value.trim();
+    if (!nama) {
+        showResult('guruResult', 'Masukkan nama guru terlebih dahulu!', 'danger');
+        return;
+    }
+
+    if (tambahGuru(nama)) {
+        tambahLog(`Menambahkan guru: ${nama}`);
+        document.getElementById('namaGuru').value = '';
+        renderGuruList();
+        showResult('guruResult', `✅ Guru "${nama}" berhasil ditambahkan!`, 'success');
+    } else {
+        showResult('guruResult', `❌ Guru "${nama}" sudah terdaftar!`, 'danger');
     }
 }
 
+function hapusGuru(nama) {
+    if (!confirm(`Hapus guru "${nama}"?`)) return;
+    hapusGuru(nama);
+    tambahLog(`Menghapus guru: ${nama}`);
+    renderGuruList();
+    alert(`✅ Guru "${nama}" berhasil dihapus.`);
+}
+
 // --- CMS PENGATURAN ---
-async function loadCMSPengaturan() {
+function loadCMSPengaturan() {
     if (!localStorage.getItem('admin_logged_in')) {
         window.location.href = 'login.html';
         return;
     }
 
-    try {
-        const [pengaturan, permintaan, logs] = await Promise.all([
-            getPengaturan(),
-            getPermintaan(),
-            getLog()
-        ]);
+    const pengaturan = getPengaturan();
+    document.getElementById('infoTahun').textContent = pengaturan.tahun || '2026';
+    document.getElementById('infoNomor').textContent = String(pengaturan.nomor).padStart(3, '0');
 
-        document.getElementById('infoTahun').textContent = pengaturan.tahun || '2026';
-        document.getElementById('infoNomor').textContent = String(pengaturan.nomor_terakhir).padStart(3, '0');
-        const totalSurat = permintaan.filter(p => p.status === 'disetujui').length;
-        document.getElementById('infoTotal').textContent = totalSurat;
+    const permintaan = getPermintaan();
+    const totalSurat = permintaan.filter(p => p.status === 'disetujui').length;
+    document.getElementById('infoTotal').textContent = totalSurat;
 
-        const tahunSelect = document.getElementById('tahunHapus');
-        if (tahunSelect) {
-            const tahunList = [...new Set(permintaan.map(p => p.tahun))].sort();
-            tahunSelect.innerHTML = '<option value="">-- Pilih Tahun --</option>';
-            tahunList.forEach(t => {
-                tahunSelect.innerHTML += `<option value="${t}">${t}</option>`;
-            });
-            if (tahunList.length === 0) {
-                tahunSelect.innerHTML += `<option value="" disabled>Belum ada data</option>`;
-            }
+    const tahunSelect = document.getElementById('tahunHapus');
+    if (tahunSelect) {
+        const tahunList = [...new Set(permintaan.map(p => p.tahun))].sort();
+        tahunSelect.innerHTML = '<option value="">-- Pilih Tahun --</option>';
+        tahunList.forEach(t => {
+            tahunSelect.innerHTML += `<option value="${t}">${t}</option>`;
+        });
+        if (tahunList.length === 0) {
+            tahunSelect.innerHTML += `<option value="" disabled>Belum ada data</option>`;
         }
-
-        renderLog(logs);
-
-        const aturForm = document.getElementById('aturNomorForm');
-        if (aturForm) aturForm.addEventListener('submit', handleAturNomor);
-
-        const resetForm = document.getElementById('resetNomorForm');
-        if (resetForm) resetForm.addEventListener('submit', handleResetNomor);
-
-        const hapusForm = document.getElementById('hapusDataForm');
-        if (hapusForm) hapusForm.addEventListener('submit', handleHapusData);
-
-        const gantiForm = document.getElementById('gantiAkunForm');
-        if (gantiForm) gantiForm.addEventListener('submit', handleGantiAkun);
-
-    } catch (error) {
-        console.error('Error load pengaturan:', error);
-        alert('Gagal memuat data pengaturan.');
     }
+
+    renderLog();
+
+    document.getElementById('aturNomorForm').addEventListener('submit', handleAturNomor);
+    document.getElementById('resetNomorForm').addEventListener('submit', handleResetNomor);
+    document.getElementById('hapusDataForm').addEventListener('submit', handleHapusData);
+    document.getElementById('gantiAkunForm').addEventListener('submit', handleGantiAkun);
 }
 
-function renderLog(logs) {
+function renderLog() {
+    const logs = getLog();
     const tbody = document.getElementById('logBody');
     if (!tbody) return;
 
-    if (!logs || logs.length === 0) {
+    if (logs.length === 0) {
         tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#a0aec0;padding:20px;">Belum ada aktivitas</td></tr>`;
         return;
     }
@@ -576,7 +629,7 @@ function renderLog(logs) {
     tbody.innerHTML = html;
 }
 
-async function handleAturNomor(e) {
+function handleAturNomor(e) {
     e.preventDefault();
     const nomorBaru = parseInt(document.getElementById('nomorBaru').value);
     const password = document.getElementById('passwordAtur').value.trim();
@@ -586,133 +639,103 @@ async function handleAturNomor(e) {
         return;
     }
 
-    try {
-        const admin = await getAdmin();
-        if (password !== admin.password) {
-            showResult('aturNomorResult', '❌ Password admin salah!', 'danger');
-            return;
-        }
-
-        const pengaturan = await getPengaturan();
-        const nomorLama = pengaturan.nomor_terakhir;
-        await updatePengaturan({ nomor_terakhir: nomorBaru });
-        await tambahLog(`Mengubah nomor urut: ${String(nomorLama).padStart(3, '0')} → ${String(nomorBaru).padStart(3, '0')}`);
-
-        document.getElementById('passwordAtur').value = '';
-        document.getElementById('nomorBaru').value = '';
-        showResult('aturNomorResult', `✅ Nomor urut berhasil diubah ke ${String(nomorBaru).padStart(3, '0')}`, 'success');
-        loadCMSPengaturan();
-
-    } catch (error) {
-        console.error('Error atur nomor:', error);
-        showResult('aturNomorResult', '❌ Gagal mengubah nomor urut.', 'danger');
+    const savedPassword = localStorage.getItem('admin_password') || ADMIN_PASSWORD;
+    if (password !== savedPassword) {
+        showResult('aturNomorResult', '❌ Password admin salah!', 'danger');
+        return;
     }
+
+    const pengaturan = getPengaturan();
+    const nomorLama = pengaturan.nomor;
+    updatePengaturan(nomorBaru);
+    tambahLog(`Mengubah nomor urut: ${String(nomorLama).padStart(3, '0')} → ${String(nomorBaru).padStart(3, '0')}`);
+
+    document.getElementById('passwordAtur').value = '';
+    document.getElementById('nomorBaru').value = '';
+    showResult('aturNomorResult', `✅ Nomor urut berhasil diubah ke ${String(nomorBaru).padStart(3, '0')}`, 'success');
+    loadCMSPengaturan();
 }
 
-async function handleResetNomor(e) {
+function handleResetNomor(e) {
     e.preventDefault();
     const password = document.getElementById('passwordReset').value.trim();
 
-    try {
-        const admin = await getAdmin();
-        if (password !== admin.password) {
-            showResult('resetNomorResult', '❌ Password admin salah!', 'danger');
-            return;
-        }
-
-        if (!confirm('⚠️ Reset nomor urut ke 000?\n\nData tahun lalu TIDAK akan dihapus.')) return;
-
-        await updatePengaturan({ nomor_terakhir: 0 });
-        await tambahLog('Reset nomor urut ke 000');
-
-        document.getElementById('passwordReset').value = '';
-        showResult('resetNomorResult', '✅ Nomor urut berhasil direset ke 000', 'success');
-        loadCMSPengaturan();
-
-    } catch (error) {
-        console.error('Error reset nomor:', error);
-        showResult('resetNomorResult', '❌ Gagal reset nomor urut.', 'danger');
+    const savedPassword = localStorage.getItem('admin_password') || ADMIN_PASSWORD;
+    if (password !== savedPassword) {
+        showResult('resetNomorResult', '❌ Password admin salah!', 'danger');
+        return;
     }
+
+    if (!confirm('⚠️ Reset nomor urut ke 000?\n\nData tahun lalu TIDAK akan dihapus.')) return;
+
+    updatePengaturan(0);
+    tambahLog('Reset nomor urut ke 000');
+
+    document.getElementById('passwordReset').value = '';
+    showResult('resetNomorResult', '✅ Nomor urut berhasil direset ke 000', 'success');
+    loadCMSPengaturan();
 }
 
-async function handleHapusData(e) {
+function handleHapusData(e) {
     e.preventDefault();
     const tahun = document.getElementById('tahunHapus').value;
     const password = document.getElementById('passwordHapus').value.trim();
 
-    if (!tahun) {
-        showResult('hapusDataResult', 'Pilih tahun terlebih dahulu!', 'danger');
+    const savedPassword = localStorage.getItem('admin_password') || ADMIN_PASSWORD;
+    if (password !== savedPassword) {
+        showResult('hapusDataResult', '❌ Password admin salah!', 'danger');
         return;
     }
 
-    try {
-        const admin = await getAdmin();
-        if (password !== admin.password) {
-            showResult('hapusDataResult', '❌ Password admin salah!', 'danger');
-            return;
-        }
-
-        const permintaan = await getPermintaan();
-        const jumlah = permintaan.filter(p => p.tahun === tahun).length;
-        if (jumlah === 0) {
-            showResult('hapusDataResult', `Tidak ada data surat tahun ${tahun}`, 'warning');
-            return;
-        }
-
-        if (!confirm(`⚠️ HAPUS PERMANEN ${jumlah} data surat tahun ${tahun}?\n\nTINDAKAN INI TIDAK BISA DIBATALKAN!`)) return;
-
-        for (const p of permintaan) {
-            if (p.tahun === tahun) {
-                await supabaseRequest(`permintaan?id=eq.${p.id}`, 'DELETE');
-            }
-        }
-        await tambahLog(`Menghapus ${jumlah} data surat tahun ${tahun}`);
-
-        document.getElementById('passwordHapus').value = '';
-        showResult('hapusDataResult', `✅ ${jumlah} data surat tahun ${tahun} berhasil dihapus`, 'success');
-        loadCMSPengaturan();
-
-    } catch (error) {
-        console.error('Error hapus data:', error);
-        showResult('hapusDataResult', '❌ Gagal menghapus data.', 'danger');
+    const permintaan = getPermintaan();
+    const jumlah = permintaan.filter(p => p.tahun === tahun).length;
+    if (jumlah === 0) {
+        showResult('hapusDataResult', `Tidak ada data surat tahun ${tahun}`, 'warning');
+        return;
     }
+
+    if (!confirm(`⚠️ HAPUS PERMANEN ${jumlah} data surat tahun ${tahun}?\n\nTINDAKAN INI TIDAK BISA DIBATALKAN!`)) return;
+
+    const data = getData();
+    data.permintaan = data.permintaan.filter(p => p.tahun !== tahun);
+    saveData(data);
+    tambahLog(`Menghapus ${jumlah} data surat tahun ${tahun}`);
+
+    document.getElementById('passwordHapus').value = '';
+    showResult('hapusDataResult', `✅ ${jumlah} data surat tahun ${tahun} berhasil dihapus`, 'success');
+    loadCMSPengaturan();
 }
 
-async function handleGantiAkun(e) {
+function handleGantiAkun(e) {
     e.preventDefault();
     const usernameBaru = document.getElementById('usernameBaru').value.trim();
     const passwordBaru = document.getElementById('passwordBaru').value.trim();
     const passwordLama = document.getElementById('passwordLama').value.trim();
+
+    const savedPassword = localStorage.getItem('admin_password') || ADMIN_PASSWORD;
+    if (passwordLama !== savedPassword) {
+        showResult('gantiAkunResult', '❌ Password lama salah!', 'danger');
+        return;
+    }
 
     if (!usernameBaru || !passwordBaru || passwordBaru.length < 6) {
         showResult('gantiAkunResult', 'Username dan password (min 6 karakter) wajib diisi!', 'danger');
         return;
     }
 
-    try {
-        const admin = await getAdmin();
-        if (passwordLama !== admin.password) {
-            showResult('gantiAkunResult', '❌ Password lama salah!', 'danger');
-            return;
-        }
+    localStorage.setItem('admin_username', usernameBaru);
+    localStorage.setItem('admin_password', passwordBaru);
+    tambahLog(`Mengganti username menjadi "${usernameBaru}"`);
 
-        await updateAdmin(usernameBaru, passwordBaru);
-        await tambahLog(`Mengganti username menjadi "${usernameBaru}"`);
+    document.getElementById('usernameBaru').value = '';
+    document.getElementById('passwordBaru').value = '';
+    document.getElementById('passwordLama').value = '';
+    showResult('gantiAkunResult', '✅ Username & password berhasil diubah! Silakan login ulang.', 'success');
 
-        document.getElementById('usernameBaru').value = '';
-        document.getElementById('passwordBaru').value = '';
-        document.getElementById('passwordLama').value = '';
-        showResult('gantiAkunResult', '✅ Username & password berhasil diubah! Silakan login ulang.', 'success');
-
-        setTimeout(() => {
-            localStorage.removeItem('admin_logged_in');
-            window.location.href = 'login.html';
-        }, 2000);
-
-    } catch (error) {
-        console.error('Error ganti akun:', error);
-        showResult('gantiAkunResult', '❌ Gagal mengubah akun.', 'danger');
-    }
+    setTimeout(() => {
+        localStorage.removeItem('admin_logged_in');
+        window.location.href = 'login.html';
+    }, 2000);
 }
 
 // --- EXPORT EXCEL ---
@@ -749,15 +772,11 @@ function exportToExcel(permintaan) {
 }
 
 // --- INDEX PAGE STATS ---
-async function loadIndexStats() {
-    try {
-        const permintaan = await getPermintaan();
-        document.getElementById('totalSurat').textContent = permintaan.length;
-        document.getElementById('menunggu').textContent = permintaan.filter(p => p.status === 'menunggu').length;
-        document.getElementById('disetujui').textContent = permintaan.filter(p => p.status === 'disetujui').length;
-    } catch (error) {
-        console.error('Error load index stats:', error);
-    }
+function loadIndexStats() {
+    const permintaan = getPermintaan();
+    document.getElementById('totalSurat').textContent = permintaan.length;
+    document.getElementById('menunggu').textContent = permintaan.filter(p => p.status === 'menunggu').length;
+    document.getElementById('disetujui').textContent = permintaan.filter(p => p.status === 'disetujui').length;
 }
 
 // --- INITIALIZATION ---
@@ -785,6 +804,9 @@ document.addEventListener('DOMContentLoaded', function() {
         case 'cms-pengaturan.html':
             loadCMSPengaturan();
             break;
+        case 'logout.html':
+            localStorage.removeItem('admin_logged_in');
+            break;
     }
 });
 
@@ -794,5 +816,6 @@ window.tolakPermintaan = tolakPermintaan;
 window.hapusGuru = hapusGuru;
 
 console.log('✅ SMKS MAESTRO - Sistem Nomor Surat Otomatis');
-console.log('📁 Menggunakan Supabase database');
+console.log('📁 Menggunakan localStorage (tanpa database)');
 console.log('👤 Login default: admin / admin123');
+console.log('💡 Semua data tersimpan di browser Anda.');

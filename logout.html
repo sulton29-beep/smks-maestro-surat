@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logout - SMKS MAESTRO</title>
+    <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+    <div class="container login-container">
+        <div class="login-card" style="text-align:center;">
+            <div class="login-icon">👋</div>
+            <h2>Anda Telah Logout</h2>
+            <p>Terima kasih telah menggunakan Sistem Nomor Surat Otomatis SMKS MAESTRO.</p>
+            <br />
+            <a href="login.html" class="btn btn-primary">Login Kembali</a>
+            <br /><br />
+            <a href="index.html" class="btn btn-secondary">← Kembali ke Beranda</a>
+        </div>
+    </div>
+    <script>
+        localStorage.removeItem('admin_logged_in');
+    </script>
+</body>
+</html>

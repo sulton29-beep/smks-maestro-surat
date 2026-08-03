@@ -20,11 +20,11 @@
             </div>
             <div class="header-actions">
                 <a href="dashboard.html" class="btn btn-secondary">← Dashboard</a>
-                <a href="index.html" class="btn btn-danger">🚪 Logout</a>
+                <a href="logout.html" class="btn btn-danger">🚪 Logout</a>
             </div>
         </header>
 
-        <!-- Informasi Nomor Saat Ini -->
+        <!-- Informasi -->
         <section class="info-section">
             <div class="info-card">
                 <h4>📊 Informasi Nomor Surat Saat Ini</h4>
@@ -45,7 +45,7 @@
             </div>
         </section>
 
-        <!-- 1. Atur Nomor Urut -->
+        <!-- 1. Atur Nomor -->
         <section class="setting-section">
             <div class="setting-card">
                 <h4>✏️ Atur Nomor Urut Manual</h4>
@@ -53,8 +53,8 @@
                 <form id="aturNomorForm">
                     <div class="form-group">
                         <label for="nomorBaru">Nomor Urut Baru</label>
-                        <input type="number" id="nomorBaru" placeholder="Contoh: 003" min="0" required />
-                        <small class="form-hint">Masukkan angka tanpa leading zero (contoh: 3 → otomatis jadi 003)</small>
+                        <input type="number" id="nomorBaru" placeholder="Contoh: 3" min="0" required />
+                        <small class="form-hint">Masukkan angka (contoh: 3 → otomatis jadi 003)</small>
                     </div>
                     <div class="form-group">
                         <label for="passwordAtur">Password Admin</label>
@@ -66,7 +66,7 @@
             </div>
         </section>
 
-        <!-- 2. Reset Nomor Urut -->
+        <!-- 2. Reset Nomor -->
         <section class="setting-section">
             <div class="setting-card setting-danger">
                 <h4>🔄 Reset Nomor Urut</h4>
@@ -82,7 +82,7 @@
             </div>
         </section>
 
-        <!-- 3. Hapus Data Tahun Lalu -->
+        <!-- 3. Hapus Data -->
         <section class="setting-section">
             <div class="setting-card setting-danger">
                 <h4>🗑️ Hapus Data Tahun Lalu</h4>
@@ -104,7 +104,7 @@
             </div>
         </section>
 
-        <!-- 4. Ganti Username/Password -->
+        <!-- 4. Ganti Akun -->
         <section class="setting-section">
             <div class="setting-card">
                 <h4>🔐 Ganti Username & Password</h4>
@@ -115,7 +115,7 @@
                     </div>
                     <div class="form-group">
                         <label for="passwordBaru">Password Baru</label>
-                        <input type="password" id="passwordBaru" placeholder="Masukkan password baru" required />
+                        <input type="password" id="passwordBaru" placeholder="Masukkan password baru (min 6 karakter)" required />
                     </div>
                     <div class="form-group">
                         <label for="passwordLama">Password Lama (Konfirmasi)</label>
@@ -127,7 +127,7 @@
             </div>
         </section>
 
-        <!-- 5. Log Aktivitas -->
+        <!-- 5. Log -->
         <section class="setting-section">
             <div class="setting-card">
                 <h4>📜 Log Aktivitas</h4>
@@ -148,9 +148,8 @@
             </div>
         </section>
 
-        <!-- Footer -->
         <footer class="footer">
-            <p>&copy; 2026 SLTNET.SMKS.Mst - Sistem Nomor Surat Otomatis</p>
+            <p>&copy; 2026 SMKS MAESTRO - Sistem Nomor Surat Otomatis</p>
         </footer>
     </div>
 
