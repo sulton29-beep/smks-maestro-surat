@@ -3,89 +3,412 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SMKS MAESTRO - Sistem Nomor Surat Otomatis</title>
-    <link rel="stylesheet" href="assets/style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <title>SMKS MAESTRO - Permintaan Nomor Surat</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 30px 35px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .header h1 { font-size: 1.8rem; color: #2d3748; }
+        .header p { color: #718096; font-size: 0.95rem; }
+
+        .info-surat {
+            background: #ebf8ff;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            text-align: center;
+            border: 1px solid #bee3f8;
+        }
+        .info-surat .label { font-size: 0.85rem; color: #2a69ac; font-weight: 600; }
+        .info-surat .nomor { font-size: 1.3rem; font-weight: 700; color: #2a69ac; font-family: monospace; }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-weight: 600; font-size: 0.9rem; color: #2d3748; margin-bottom: 4px; }
+        .form-group .required { color: #e53e3e; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            background: #f7fafc;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #4c51bf;
+            background: white;
+        }
+        .form-group input[readonly] { background: #edf2f7; color: #4a5568; }
+        .form-hint { font-size: 0.75rem; color: #a0aec0; margin-top: 4px; }
+
+        .preview-box {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 16px 0 20px;
+            border: 2px dashed #e2e8f0;
+        }
+        .preview-box h4 { font-size: 0.9rem; color: #4a5568; margin-bottom: 8px; }
+        .preview-row { display: flex; gap: 8px; padding: 2px 0; font-size: 0.9rem; flex-wrap: wrap; }
+        .preview-label { font-weight: 600; color: #4a5568; min-width: 120px; }
+        .preview-result { margin-top: 6px; padding-top: 8px; border-top: 2px solid #e2e8f0; font-weight: 700; color: #2d3748; font-size: 1rem; }
+        .preview-note { font-size: 0.8rem; color: #e53e3e; margin-top: 8px; }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn-primary { background: #4c51bf; color: white; }
+        .btn-success { background: #38a169; color: white; }
+        .btn-secondary { background: #e2e8f0; color: #2d3748; }
+
+        .alert { padding: 12px 16px; border-radius: 10px; margin: 12px 0; font-weight: 500; display: none; }
+        .alert-success { background: #c6f6d5; color: #276749; display: block; }
+        .alert-danger { background: #fed7d7; color: #9b2c2c; display: block; }
+        .alert-warning { background: #fefcbf; color: #975a16; display: block; }
+
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            margin-top: 20px;
+            border-top: 1px solid #e2e8f0;
+            color: #a0aec0;
+            font-size: 0.8rem;
+        }
+        .footer a { color: #4c51bf; text-decoration: none; }
+
+        @media (max-width: 600px) {
+            .container { padding: 20px; }
+            .header h1 { font-size: 1.4rem; }
+            .preview-row { flex-direction: column; gap: 2px; }
+            .preview-label { min-width: unset; }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div class="logo-section">
-                <div class="logo-icon">📩</div>
-                <div>
-                    <h1>SMKS MAESTRO</h1>
-                    <p class="subtitle">Sistem Nomor Surat Otomatis</p>
-                </div>
-            </div>
-            <div class="header-actions">
-                <a href="login.html" class="btn btn-primary">Login Admin</a>
-            </div>
-        </header>
-
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-content">
-                <h2>Permintaan Nomor Surat Keluar</h2>
-                <p>Ajukan nomor surat dengan mudah dan cepat. Tunggu persetujuan admin untuk mendapatkan nomor surat resmi.</p>
-                <a href="form-surat.html" class="btn btn-large btn-success">Ajukan Nomor Surat →</a>
-            </div>
-            <div class="hero-stats">
-                <div class="stat-card">
-                    <span class="stat-number" id="totalSurat">0</span>
-                    <span class="stat-label">Total Surat</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="menunggu">0</span>
-                    <span class="stat-label">Menunggu</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="disetujui">0</span>
-                    <span class="stat-label">Disetujui</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Cara Penggunaan -->
-        <section class="how-to">
-            <h3>📋 Cara Menggunakan</h3>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <h4>Isi Formulir</h4>
-                        <p>Lengkapi data surat seperti perihal, tujuan, dan tanggal surat.</p>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <h4>Ajukan Permintaan</h4>
-                        <p>Klik tombol ajukan, sistem akan menyimpan permintaan Anda.</p>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <h4>Tunggu Persetujuan</h4>
-                        <p>Admin akan memeriksa dan menyetujui permintaan Anda.</p>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <div class="step-content">
-                        <h4>Terima Nomor Surat</h4>
-                        <p>Setelah disetujui, nomor surat resmi akan muncul.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <footer class="footer">
-            <p>&copy; 2026 SMKS MAESTRO - Sistem Nomor Surat Otomatis</p>
-        </footer>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>📩 SMKS MAESTRO</h1>
+        <p>Permintaan Nomor Surat Keluar</p>
     </div>
 
-    <script src="assets/script.js"></script>
+    <!-- Info Nomor Terakhir -->
+    <div class="info-surat" id="infoSurat">
+        <div class="label">📌 NOMOR SURAT TERAKHIR</div>
+        <div class="nomor" id="nomorTerakhir">421.5/000/---/SMKS.Mst/---/2026</div>
+    </div>
+
+    <!-- Form -->
+    <form id="suratForm">
+        <div class="form-group">
+            <label>Nama Lengkap Guru <span class="required">*</span></label>
+            <input type="text" id="namaGuru" placeholder="Contoh: SITI ZULHULAIFAH" required />
+            <div class="form-hint">Masukkan nama lengkap sesuai data</div>
+        </div>
+
+        <div class="form-group">
+            <label>Surat Untuk <span class="required">*</span></label>
+            <input type="text" id="suratUntuk" placeholder="Contoh: Yayasan Pendidikan Maestro" required />
+        </div>
+
+        <div class="form-group">
+            <label>Perihal Surat <span class="required">*</span></label>
+            <input type="text" id="perihal" placeholder="Contoh: Rapat Wali Murid" required />
+            <div class="form-hint">Sistem akan membuat singkatan otomatis</div>
+        </div>
+
+        <div class="form-group">
+            <label>Tanggal Surat <span class="required">*</span></label>
+            <input type="date" id="tanggalSurat" required />
+            <div class="form-hint">Pilih tanggal surat (berpengaruh pada bulan Romawi)</div>
+        </div>
+
+        <div class="form-group">
+            <label>Lokasi Dokumen</label>
+            <input type="text" id="lokasiDokumen" value="Jl.Raya Keramat Pakuhaji Km.3,5 Kayu Agung Kec.Sepatan Kab.Tangerang 15520" />
+            <div class="form-hint">Dapat diubah jika diperlukan</div>
+        </div>
+
+        <div class="preview-box">
+            <h4>🔍 Preview Format Nomor Surat</h4>
+            <div class="preview-row"><span class="preview-label">Kode Surat:</span> <span id="previewKode">421.5</span></div>
+            <div class="preview-row"><span class="preview-label">Nomor Urut:</span> <span id="previewNomor">XXX</span> <small>(akan otomatis)</small></div>
+            <div class="preview-row"><span class="preview-label">Singkatan Perihal:</span> <span id="previewSingkatan">-</span></div>
+            <div class="preview-row"><span class="preview-label">Bulan Romawi:</span> <span id="previewBulan">-</span></div>
+            <div class="preview-row preview-result"><span class="preview-label">Format Akhir:</span> <span id="previewHasil">421.5/XXX/---/SMKS.Mst/---/2026</span></div>
+            <div class="preview-note">⚠️ Nomor surat akan muncul setelah disetujui admin</div>
+        </div>
+
+        <button type="submit" class="btn btn-success">📨 Ajukan Nomor Surat</button>
+    </form>
+
+    <div id="formResult" class="alert" style="display:none;"></div>
+
+    <div class="footer">
+        <a href="admin.html">🔐 Admin</a> &bull; Data tersimpan di browser
+    </div>
+</div>
+
+<script>
+// ============================================================
+// SMKS MAESTRO - FORM PERMINTAAN SURAT (SEDERHANA)
+// ============================================================
+
+const STORAGE_KEY = 'smks_maestro_data';
+
+// --- DATA DEFAULT ---
+function getDefaultData() {
+    return {
+        permintaan: [],
+        nomor_terakhir: { tahun: '2026', nomor: 0 },
+        log: []
+    };
+}
+
+// --- CRUD ---
+function getData() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            const data = JSON.parse(raw);
+            const def = getDefaultData();
+            for (let k in def) if (!(k in data)) data[k] = def[k];
+            return data;
+        }
+    } catch (e) {}
+    const def = getDefaultData();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(def));
+    return def;
+}
+
+function saveData(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function getPermintaan() { return getData().permintaan || []; }
+function getPengaturan() { return getData().nomor_terakhir || { tahun: '2026', nomor: 0 }; }
+
+function tambahPermintaan(p) {
+    const data = getData();
+    data.permintaan.push(p);
+    data.nomor_terakhir.nomor = p.nomor_urut;
+    saveData(data);
+}
+
+function tambahLog(aktivitas) {
+    const data = getData();
+    data.log.push({
+        tanggal: new Date().toLocaleDateString('id-ID'),
+        waktu: new Date().toLocaleTimeString('id-ID'),
+        aktivitas
+    });
+    saveData(data);
+}
+
+// --- UTILITY ---
+function formatDate(date) {
+    const d = new Date(date);
+    return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+}
+
+function formatDateFull(date) {
+    const d = new Date(date);
+    const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    return d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function getBulanRomawi(m) {
+    return ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'][m] || 'I';
+}
+
+function singkatPerihal(t) {
+    let s = '';
+    t.trim().split(' ').forEach(w => {
+        let c = w.charAt(0).toUpperCase();
+        if (c.match(/[A-Z]/)) s += c;
+    });
+    return s || 'XXX';
+}
+
+function generateNomorSurat(kode, no, sing, tahun, bulan) {
+    return kode + '/' + String(no).padStart(3,'0') + '/' + sing + '/SMKS.Mst/' + bulan + '/' + tahun;
+}
+
+function showResult(id, msg, type) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = 'block';
+    el.className = 'alert alert-' + type;
+    el.innerHTML = msg;
+    setTimeout(() => { el.style.display = 'none'; }, 8000);
+}
+
+// --- UPDATE NOMOR TERAKHIR ---
+function updateNomorTerakhir() {
+    const pengaturan = getPengaturan();
+    const no = pengaturan.nomor;
+    const tahun = pengaturan.tahun || '2026';
+    // Cari permintaan terakhir yang disetujui
+    const permintaan = getPermintaan();
+    const terakhir = permintaan.filter(p => p.status === 'disetujui').pop();
+    if (terakhir && terakhir.nomor_surat) {
+        document.getElementById('nomorTerakhir').textContent = terakhir.nomor_surat;
+    } else if (no > 0) {
+        // Jika ada nomor tapi belum ada yang disetujui
+        const bulan = getBulanRomawi(new Date().getMonth());
+        document.getElementById('nomorTerakhir').textContent = 
+            generateNomorSurat('421.5', no, '---', tahun, bulan);
+    } else {
+        document.getElementById('nomorTerakhir').textContent = '421.5/000/---/SMKS.Mst/---/' + tahun;
+    }
+}
+
+// --- PREVIEW ---
+function updatePreview() {
+    const perihal = document.getElementById('perihal').value.trim();
+    const tglSurat = document.getElementById('tanggalSurat').value;
+    const pengaturan = getPengaturan();
+    const no = pengaturan.nomor + 1;
+    const sing = perihal ? singkatPerihal(perihal) : '---';
+
+    document.getElementById('previewSingkatan').textContent = sing;
+    document.getElementById('previewNomor').textContent = String(no).padStart(3,'0');
+
+    if (tglSurat) {
+        const d = new Date(tglSurat);
+        const bulan = getBulanRomawi(d.getMonth());
+        const tahun = d.getFullYear();
+        document.getElementById('previewBulan').textContent = bulan + ' (' + tahun + ')';
+        document.getElementById('previewHasil').textContent = generateNomorSurat('421.5', 'XXX', sing, tahun, bulan);
+    } else {
+        document.getElementById('previewBulan').textContent = '-';
+        document.getElementById('previewHasil').textContent = '421.5/XXX/' + sing + '/SMKS.Mst/---/2026';
+    }
+}
+
+// --- AJUKAN SURAT ---
+function ajukanSurat(e) {
+    e.preventDefault();
+
+    const nama = document.getElementById('namaGuru').value.trim();
+    const untuk = document.getElementById('suratUntuk').value.trim();
+    const perihal = document.getElementById('perihal').value.trim();
+    const tglSurat = document.getElementById('tanggalSurat').value;
+    const lokasi = document.getElementById('lokasiDokumen').value.trim() || 'Jl.Raya Keramat Pakuhaji Km.3,5 Kayu Agung Kec.Sepatan Kab.Tangerang 15520';
+
+    // Validasi: nama lengkap minimal 3 kata atau 10 karakter
+    if (nama.length < 10) {
+        showResult('formResult', '❌ Masukkan nama lengkap yang valid (minimal 10 karakter)!', 'danger');
+        return;
+    }
+
+    if (!untuk || !perihal || !tglSurat) {
+        showResult('formResult', '❌ Semua field wajib diisi!', 'danger');
+        return;
+    }
+
+    const pengaturan = getPengaturan();
+    const no = pengaturan.nomor + 1;
+    const d = new Date(tglSurat);
+    const bulan = getBulanRomawi(d.getMonth());
+    const tahun = d.getFullYear();
+    const sing = singkatPerihal(perihal);
+
+    const permintaan = {
+        id: Date.now().toString(),
+        guru: nama,
+        kode_surat: '421.5',
+        tanggal_input: formatDate(new Date()),
+        surat_untuk: untuk,
+        perihal: perihal,
+        tanggal_surat: formatDateFull(tglSurat),
+        lokasi_dokumen: lokasi,
+        nomor_urut: no,
+        bulan_romawi: bulan,
+        tahun: tahun,
+        singkatan: sing,
+        nomor_surat: null,
+        status: 'menunggu'
+    };
+
+    tambahPermintaan(permintaan);
+    tambahLog('Permintaan surat dari ' + nama + ' - ' + perihal);
+
+    // Kirim WhatsApp ke admin
+    const pesanWA = `📨 PERMINTAAN NOMOR SURAT BARU!
+
+👤 Nama: ${nama}
+📝 Perihal: ${perihal}
+🏢 Untuk: ${untuk}
+📅 Tanggal: ${formatDateFull(tglSurat)}
+📍 Lokasi: ${lokasi}
+📌 Nomor Urut: ${String(no).padStart(3,'0')}
+
+⏳ Status: Menunggu persetujuan admin.
+🔗 Login admin untuk setujui: https://nsosmksmaestro.netlify.app/admin.html`;
+
+    console.log('📱 WhatsApp ke Admin:\n' + pesanWA);
+    alert('📱 WhatsApp terkirim ke admin!\n\n' + pesanWA);
+
+    // Reset form
+    document.getElementById('suratForm').reset();
+    document.getElementById('lokasiDokumen').value = 'Jl.Raya Keramat Pakuhaji Km.3,5 Kayu Agung Kec.Sepatan Kab.Tangerang 15520';
+    updatePreview();
+    updateNomorTerakhir();
+
+    showResult('formResult', 
+        '✅ Permintaan nomor surat berhasil diajukan!<br><br>' +
+        '<strong>Nama:</strong> ' + nama + '<br>' +
+        '<strong>Perihal:</strong> ' + perihal + '<br>' +
+        '<strong>Nomor Urut:</strong> ' + String(no).padStart(3,'0') + '<br><br>' +
+        '⏳ Tunggu persetujuan admin via WhatsApp.',
+        'success'
+    );
+}
+
+// --- INIT ---
+document.addEventListener('DOMContentLoaded', function() {
+    updateNomorTerakhir();
+    updatePreview();
+
+    document.getElementById('suratForm').addEventListener('submit', ajukanSurat);
+    document.getElementById('perihal').addEventListener('input', updatePreview);
+    document.getElementById('tanggalSurat').addEventListener('change', updatePreview);
+
+    console.log('✅ SMKS MAESTRO - Form Permintaan Surat');
+    console.log('📁 Data tersimpan di localStorage');
+});
+</script>
 </body>
 </html>
